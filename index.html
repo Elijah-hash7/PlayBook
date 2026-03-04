@@ -42,6 +42,72 @@
   }
   nav .wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
   .nav-logo { font-size:12px; font-weight:700; color:var(--green); letter-spacing:1px; }
+  .nav-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(18,18,32,0.96), rgba(13,13,26,0.96));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.35);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+  }
+  .nav-toggle:hover {
+    border-color: rgba(0,229,160,0.45);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 28px rgba(0,0,0,0.42);
+  }
+  .nav-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,229,160,0.2), inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 28px rgba(0,0,0,0.42);
+  }
+  .nav-toggle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 25%, rgba(0,229,160,0.16), transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 480ms ease;
+  }
+  .nav-toggle:hover::after {
+    transform: translateX(120%);
+  }
+  .nav-toggle-box {
+    width: 20px;
+    height: 16px;
+    position: relative;
+    display: block;
+    z-index: 1;
+  }
+  .nav-toggle-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 99px;
+    background: #e7fff8;
+    transform-origin: center;
+    transition: transform 280ms ease, opacity 200ms ease, top 280ms ease;
+  }
+  .nav-toggle-line:nth-child(1) { top: 0; }
+  .nav-toggle-line:nth-child(2) { top: 7px; }
+  .nav-toggle-line:nth-child(3) { top: 14px; }
+  .nav-toggle.active .nav-toggle-line:nth-child(1) {
+    top: 7px;
+    transform: rotate(45deg);
+  }
+  .nav-toggle.active .nav-toggle-line:nth-child(2) {
+    opacity: 0;
+  }
+  .nav-toggle.active .nav-toggle-line:nth-child(3) {
+    top: 7px;
+    transform: rotate(-45deg);
+  }
   .nav-links { display:flex; gap:4px; flex-wrap:wrap; }
   .nav-links a {
     font-size:10px; color:var(--muted); text-decoration:none;
@@ -85,6 +151,59 @@
   .sec-body { flex:1; }
   .sec-title { font-family:'Syne',sans-serif; font-size:clamp(22px,3vw,32px); font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
   .sec-desc { font-size:12px; color:var(--muted); line-height:1.8; max-width:640px; }
+  .section-toggle {
+    display: none;
+    margin-top: 12px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(77,159,255,0.36);
+    background: linear-gradient(120deg, rgba(77,159,255,0.18), rgba(0,229,160,0.14));
+    color: #ecfffa;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 18px rgba(0,0,0,0.26);
+    position: relative;
+    overflow: hidden;
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .section-toggle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.18), transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 520ms ease;
+  }
+  .section-toggle:hover::after {
+    transform: translateX(120%);
+  }
+  .section-toggle:hover {
+    border-color: rgba(0,229,160,0.56);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 22px rgba(0,0,0,0.35);
+  }
+  .section-toggle-label,
+  .section-toggle-icon {
+    position: relative;
+    z-index: 1;
+  }
+  .section-toggle-icon {
+    display: inline-block;
+    transform: translateY(-1px) rotate(0deg);
+    transition: transform 220ms ease;
+  }
+  section.mobile-collapsible.mobile-open .section-toggle-icon {
+    transform: translateY(-1px) rotate(90deg);
+  }
+  .section-content {
+    overflow: hidden;
+  }
 
   /* CARDS */
   .grid { display:grid; gap:12px; }
@@ -380,8 +499,54 @@
     .hero { padding:48px 0 40px; }
     section { padding:48px 0; }
     .do-dont { grid-template-columns:1fr; }
-    .nav-links { display:none; }
+    nav .wrap {
+      position: relative;
+      gap: 10px;
+    }
+    .nav-toggle {
+      display: inline-flex;
+      margin-left: auto;
+    }
+    .nav-links {
+      display: none;
+      width: 100%;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .nav-links.open {
+      display: grid;
+    }
+    .nav-links a {
+      padding: 8px 10px;
+      border-color: var(--border);
+      background: var(--surface);
+      font-size: 10px;
+      text-align: center;
+    }
     .sec-head { flex-direction:column; gap:4px; }
+    section.mobile-collapsible .sec-head {
+      margin-bottom: 0;
+    }
+    .section-toggle {
+      display: inline-flex;
+      align-self: flex-start;
+    }
+    section.mobile-collapsible .section-content {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: max-height 320ms ease, opacity 220ms ease, transform 220ms ease;
+    }
+    section.mobile-collapsible.mobile-open .section-content {
+      max-height: 20000px;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      margin-top: 16px;
+    }
     .gate-overlay { padding: 14px; }
     .gate-card {
       padding: 22px 18px;
@@ -427,7 +592,14 @@
 <nav>
   <div class="wrap">
     <div class="nav-logo">// elijah.hash — full career playbook</div>
-    <div class="nav-links">
+    <button class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">
+      <span class="nav-toggle-box" aria-hidden="true">
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </span>
+    </button>
+    <div class="nav-links" id="navLinks">
       <a href="#github">GitHub</a>
       <a href="#jobs">Jobs</a>
       <a href="#discord">Discord</a>
@@ -1500,6 +1672,8 @@
   const gatePassword = document.getElementById("gatePassword");
   const gateError = document.getElementById("gateError");
   const gateOverlay = document.getElementById("gateOverlay");
+  const navToggle = document.getElementById("navToggle");
+  const navLinks = document.getElementById("navLinks");
   const passwordFingerprint = createFingerprint(PLAYBOOK_PASSWORD);
 
   function createFingerprint(value) {
@@ -1567,6 +1741,71 @@
     clearSession();
     gatePassword.focus();
   }
+
+  if (navToggle && navLinks) {
+    navToggle.addEventListener("click", function () {
+      const isOpen = navLinks.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+      navToggle.classList.toggle("active", isOpen);
+    });
+
+    navLinks.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        navLinks.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.classList.remove("active");
+      });
+    });
+  }
+
+  const mobileQuery = window.matchMedia("(max-width: 640px)");
+  const sections = Array.from(document.querySelectorAll("section"));
+  sections.forEach(function (section, index) {
+    const wrap = section.querySelector(":scope > .wrap");
+    const head = wrap ? wrap.querySelector(".sec-head") : null;
+    if (!wrap || !head) {
+      return;
+    }
+
+    const content = document.createElement("div");
+    content.className = "section-content";
+    while (head.nextSibling) {
+      content.appendChild(head.nextSibling);
+    }
+    wrap.appendChild(content);
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "section-toggle";
+    toggle.innerHTML = '<span class="section-toggle-icon" aria-hidden="true">▸</span><span class="section-toggle-label">Explore Section</span>';
+    toggle.setAttribute("aria-expanded", "false");
+    head.appendChild(toggle);
+
+    section.classList.add("mobile-collapsible");
+    if (index === 0) {
+      section.classList.add("mobile-open");
+      toggle.querySelector(".section-toggle-label").textContent = "Hide Section";
+      toggle.setAttribute("aria-expanded", "true");
+    }
+
+    toggle.addEventListener("click", function () {
+      const willOpen = !section.classList.contains("mobile-open");
+      section.classList.toggle("mobile-open", willOpen);
+      toggle.querySelector(".section-toggle-label").textContent = willOpen ? "Hide Section" : "Explore Section";
+      toggle.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+
+  function syncMobileUI(event) {
+    if (!event.matches && navLinks && navToggle) {
+      navLinks.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.classList.remove("active");
+    }
+  }
+
+  syncMobileUI(mobileQuery);
+  mobileQuery.addEventListener("change", syncMobileUI);
 
   setInterval(function () {
     if (!document.body.classList.contains("locked") && !isSessionValid()) {
