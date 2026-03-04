@@ -239,6 +239,139 @@
   .f-left { font-size:13px; font-weight:700; color:var(--green); }
   .f-right { font-size:10px; color:var(--muted); }
 
+  /* ACCESS GATE */
+  body.locked {
+    overflow: hidden;
+  }
+  body.locked > :not(.gate-overlay) {
+    visibility: hidden;
+  }
+  .gate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at top right, rgba(0,229,160,0.12), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(77,159,255,0.12), transparent 40%),
+      rgba(7,7,15,0.98);
+  }
+  .gate-overlay[hidden] {
+    display: none !important;
+  }
+  .gate-overlay::before,
+  .gate-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: rgba(7,7,15,0.97);
+    transition: transform 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
+    will-change: transform;
+  }
+  .gate-overlay::before {
+    left: 0;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .gate-overlay::after {
+    right: 0;
+    border-left: 1px solid rgba(255,255,255,0.05);
+  }
+  .gate-overlay.opening {
+    pointer-events: none;
+  }
+  .gate-overlay.opening::before {
+    transform: translateX(-110%);
+  }
+  .gate-overlay.opening::after {
+    transform: translateX(110%);
+  }
+  .gate-card {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 440px);
+    padding: 32px;
+    border-radius: 18px;
+    border: 1px solid var(--border2);
+    background: linear-gradient(145deg, rgba(18,18,32,0.96), rgba(13,13,26,0.96));
+    box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+    transition: opacity 260ms ease, transform 260ms ease;
+  }
+  .gate-overlay.opening .gate-card {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  .gate-label {
+    margin-bottom: 12px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+  .gate-title {
+    margin-bottom: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 7vw, 42px);
+    line-height: 0.95;
+  }
+  .gate-copy {
+    margin-bottom: 22px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .gate-form {
+    display: grid;
+    gap: 12px;
+  }
+  .gate-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    font: inherit;
+    outline: none;
+  }
+  .gate-input:focus {
+    border-color: rgba(0,229,160,0.45);
+    box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
+  }
+  .gate-button {
+    padding: 14px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--green), #45f3c4);
+    color: #04120f;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .gate-error {
+    min-height: 18px;
+    font-size: 11px;
+    color: var(--red);
+  }
+  .gate-hint {
+    margin-top: 14px;
+    font-size: 10px;
+    color: var(--muted2);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gate-overlay::before,
+    .gate-overlay::after,
+    .gate-card {
+      transition: none;
+    }
+  }
+
   ::-webkit-scrollbar { width:5px; height:5px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
@@ -249,10 +382,47 @@
     .do-dont { grid-template-columns:1fr; }
     .nav-links { display:none; }
     .sec-head { flex-direction:column; gap:4px; }
+    .gate-overlay { padding: 14px; }
+    .gate-card {
+      padding: 22px 18px;
+      border-radius: 14px;
+    }
+    .gate-title {
+      font-size: clamp(24px, 11vw, 34px);
+      line-height: 1.0;
+    }
+    .gate-copy {
+      font-size: 11px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .gate-form { gap: 10px; }
+    .gate-input, .gate-button {
+      padding: 13px 14px;
+      border-radius: 9px;
+      font-size: 11px;
+    }
+    .gate-hint { margin-top: 10px; }
   }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-label">Restricted Access</div>
+    <h2 class="gate-title">Enter The Password</h2>
+    <p class="gate-copy">
+      This playbook stays locked until the correct password is entered.
+    </p>
+    <form class="gate-form" id="gateForm">
+      <input class="gate-input" id="gatePassword" type="password" placeholder="Enter password" autocomplete="current-password" required>
+      <button class="gate-button" type="submit">Unlock Playbook</button>
+      <p class="gate-error" id="gateError" aria-live="polite"></p>
+    </form>
+    <p class="gate-hint">Session expires in 5 minutes. Changing the password logs everyone out.</p>
+  </div>
+</div>
 
 <nav>
   <div class="wrap">
@@ -1322,5 +1492,99 @@
   </div>
 </footer>
 
+<script>
+  const PLAYBOOK_PASSWORD = "roadmap2026";
+  const SESSION_DURATION_MS = 5 * 60 * 1000;
+  const ACCESS_STORAGE_KEY = "playbookAccessSession";
+  const gateForm = document.getElementById("gateForm");
+  const gatePassword = document.getElementById("gatePassword");
+  const gateError = document.getElementById("gateError");
+  const gateOverlay = document.getElementById("gateOverlay");
+  const passwordFingerprint = createFingerprint(PLAYBOOK_PASSWORD);
+
+  function createFingerprint(value) {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash << 5) - hash + value.charCodeAt(i);
+      hash |= 0;
+    }
+    return String(hash);
+  }
+
+  function saveSession() {
+    const session = {
+      grantedAt: Date.now(),
+      fingerprint: passwordFingerprint
+    };
+    localStorage.setItem(ACCESS_STORAGE_KEY, JSON.stringify(session));
+  }
+
+  function clearSession() {
+    localStorage.removeItem(ACCESS_STORAGE_KEY);
+  }
+
+  function isSessionValid() {
+    let session;
+    try {
+      session = JSON.parse(localStorage.getItem(ACCESS_STORAGE_KEY) || "null");
+    } catch {
+      return false;
+    }
+
+    if (!session || session.fingerprint !== passwordFingerprint || typeof session.grantedAt !== "number") {
+      return false;
+    }
+
+    return Date.now() - session.grantedAt < SESSION_DURATION_MS;
+  }
+
+  function lockPlaybook() {
+    document.body.classList.add("locked");
+    gateOverlay.classList.remove("opening");
+    gateOverlay.hidden = false;
+    gateError.textContent = "Session expired. Enter password again.";
+    gatePassword.value = "";
+    gatePassword.focus();
+    clearSession();
+  }
+
+  function unlockPlaybook() {
+    document.body.classList.remove("locked");
+    gateOverlay.classList.add("opening");
+    gateError.textContent = "";
+    gatePassword.value = "";
+    saveSession();
+
+    window.setTimeout(function () {
+      gateOverlay.hidden = true;
+      gateOverlay.classList.remove("opening");
+    }, 720);
+  }
+
+  if (isSessionValid()) {
+    unlockPlaybook();
+  } else {
+    clearSession();
+    gatePassword.focus();
+  }
+
+  setInterval(function () {
+    if (!document.body.classList.contains("locked") && !isSessionValid()) {
+      lockPlaybook();
+    }
+  }, 10000);
+
+  gateForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (gatePassword.value.trim() === PLAYBOOK_PASSWORD) {
+      unlockPlaybook();
+      return;
+    }
+
+    gateError.textContent = "Wrong password. Try again.";
+    gatePassword.select();
+  });
+</script>
 </body>
 </html>
