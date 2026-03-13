@@ -36,18 +36,39 @@ function getPassword() {
   return process.env.PLAYBOOK_PASSWORD || "";
 }
 
-function issueSessionCookie(res) {
+function isLocalRequest(req) {
+  const host = String(req.headers.host || "").toLowerCase();
+  return host.startsWith("localhost:") || host === "localhost" || host.startsWith("127.0.0.1:") || host === "127.0.0.1";
+}
+
+function buildCookie(name, value, maxAge, req) {
+  const parts = [
+    `${name}=${encodeURIComponent(value)}`,
+    "Path=/",
+    `Max-Age=${maxAge}`,
+    "HttpOnly",
+    "SameSite=Lax"
+  ];
+
+  if (!isLocalRequest(req)) {
+    parts.push("Secure");
+  }
+
+  return parts.join("; ");
+}
+
+function issueSessionCookie(req, res) {
   const secret = getSessionSecret();
   const expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
   const payload = String(expiresAt);
   const signature = sign(payload, secret);
   const token = `${payload}.${signature}`;
-  const cookie = `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
+  const cookie = buildCookie(SESSION_COOKIE, token, SESSION_TTL_SECONDS, req);
   res.setHeader("Set-Cookie", cookie);
 }
 
-function clearSessionCookie(res) {
-  const cookie = `${SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
+function clearSessionCookie(req, res) {
+  const cookie = buildCookie(SESSION_COOKIE, "", 0, req);
   res.setHeader("Set-Cookie", cookie);
 }
 

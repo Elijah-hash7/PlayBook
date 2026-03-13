@@ -26,7 +26,7 @@ module.exports = function handler(req, res) {
     }
 
     res.setHeader("Cache-Control", "no-store");
-    issueSessionCookie(res);
+    issueSessionCookie(req, res);
     res.status(200).json({ ok: true });
   };
 
